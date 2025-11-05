@@ -12,7 +12,7 @@ export default function WeatherModule() {
     setError("");
     try {
       const res = await axios.get(
-        `/api/weather?city=${city}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/weather?city=${city}`
       );
       setData(res.data);
     } catch (err) {

@@ -10,10 +10,21 @@ const quoteRoute = require("./routes/quote");
 
 const app = express();
 
-// CORS
-const corsOptions = process.env.ALLOWED_ORIGIN
-  ? { origin: process.env.ALLOWED_ORIGIN }
-  : {};
+// CORS (supports multiple origins)
+const allowedList = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+  : process.env.ALLOWED_ORIGIN
+  ? [process.env.ALLOWED_ORIGIN]
+  : null; // null/undefined → allow all
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (same-origin, curl) or when no list is set
+    if (!allowedList || !origin) return callback(null, true);
+    if (allowedList.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+};
 app.use(cors(corsOptions));
 
 app.use(express.json());
