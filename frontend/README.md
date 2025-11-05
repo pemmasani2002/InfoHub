@@ -1,16 +1,74 @@
-# React + Vite
+# InfoHub (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Single Page App with three modules:
+- Weather display
+- Currency converter (INR base)
+- Motivational quotes
 
-Currently, two official plugins are available:
+The app talks to an Express backend at `/api/*`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Local Development
 
-## React Compiler
+- Backend
+  - `cd server && npm i && npm run dev` (runs on port 5000)
+- Frontend
+  - `cd frontend && npm i && npm run dev` (runs on port 5173)
+  - Vite proxy is configured to forward `/api` to `http://localhost:5000`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Environment Variables
 
-## Expanding the ESLint configuration
+- server/.env
+  - `PORT=5000`
+  - `OPENWEATHER_KEY=...` (optional; mock weather used if not provided)
+  - `ALLOWED_ORIGIN=` (leave empty when serving frontend from same domain; set to your frontend origin only for split deploy)
+- frontend/.env (only for split deploy)
+  - `VITE_API_BASE_URL=https://your-backend-domain.com`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Build
+
+```
+cd frontend
+npm ci
+npm run build
+```
+This produces `frontend/dist`.
+
+## Deployment Options
+
+### 1) Single Deployment (Recommended)
+- Build frontend: `cd frontend && npm ci && npm run build`
+- Install server deps: `cd ../server && npm ci`
+- Start in production: `NODE_ENV=production node server.js`
+- The Express server will serve the React build and expose APIs under `/api/*`.
+
+Render/Railway example:
+- Build command:
+```
+bash -c "cd frontend && npm ci && npm run build && cd ../server && npm ci"
+```
+- Start command:
+```
+node server.js
+```
+- Env vars: `NODE_ENV=production`, `PORT=5000`, `OPENWEATHER_KEY=...` (optional)
+
+### 2) Split Deployment (Frontend + Backend Separate)
+- Backend: deploy `server/` and set:
+  - `NODE_ENV=production`
+  - `ALLOWED_ORIGIN=https://your-frontend-domain`
+  - `OPENWEATHER_KEY=...` (optional)
+- Frontend: set `frontend/.env` with:
+  - `VITE_API_BASE_URL=https://your-backend-domain`
+- Build and deploy `frontend/dist` to static host (Vercel/Netlify/etc.)
+
+## Smoke Tests
+
+- `GET /health` → `{ "status": "ok" }`
+- `GET /api/weather?city=Hyderabad`
+- `GET /api/convert?amount=100`
+- `GET /api/quote`
+
+## Notes
+
+- Timeouts and logging are enabled on backend routes for resiliency.
+- If deploying publicly, consider adding request logging and simple rate limiting.
