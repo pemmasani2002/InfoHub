@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import WeatherModule from "./Components/WeatherModule";
-import CurrencyConverter from "./Components/CurrencyConverter";
-import QuoteGenerator from "./Components/QuoteGenerator";
+import WeatherModule from "./components/WeatherModule";
+import CurrencyConverter from "./components/CurrencyConverter";
+import QuoteGenerator from "./components/QuoteGenerator";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("weather");
